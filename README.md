@@ -34,7 +34,9 @@ Abra <http://localhost:3000> no navegador.
 2. **Escolher o grupo** — a lista vem direto do seu WhatsApp.
 3. **Marcar as exceções** — desmarque quem não participa do sorteio. Para quem
    não tem celular, desmarque *tem celular* e escolha quem vai avisar essa
-   pessoa.
+   pessoa. Para alguém que nem está no grupo, use **Pessoa de fora do grupo**:
+   digite o nome e escolha quem avisa. Ela participa do sorteio normalmente e o
+   nome dela chega só ao representante, que avisa pessoalmente.
 4. **Data e envio** — opcionalmente informe o dia da entrega, confira a prévia
    das mensagens e clique em *Sortear e enviar*.
 

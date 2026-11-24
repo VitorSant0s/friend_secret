@@ -31,6 +31,8 @@ type Row = {
   participates: boolean
   hasPhone: boolean
   representative: string
+  /** Pessoa que não está no grupo do WhatsApp. */
+  external?: boolean
 }
 
 type ProgressLine = {
@@ -236,6 +238,7 @@ export default function Home() {
   const [session, setSession] = useState<BrowserSession | null>(null)
   const [now, setNow] = useState(() => Date.now())
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [externalName, setExternalName] = useState("")
   const autoStarted = useRef(false)
   const restarting = useRef(false)
 
@@ -406,36 +409,98 @@ export default function Home() {
     }
   }, [])
 
-  const chooseGroup = useCallback(async (id: string) => {
-    setGroupId(id)
-    setGroupSubject("")
-    setRows([])
-    setProgress([])
+  const chooseGroup = useCallback(
+    async (id: string) => {
+      const sameGroup = id === groupId
+      setGroupId(id)
+      setGroupSubject("")
+      setProgress([])
+      setSummary(null)
+      setError(null)
+      if (!id) {
+        setRows([])
+        return
+      }
+
+      setLoadingPeople(true)
+      try {
+        const data = await apiJson<{
+          subject: string
+          participants: { id: string; name: string }[]
+        }>(`/api/participants?groupId=${encodeURIComponent(id)}`)
+
+        setGroupSubject(data.subject)
+        setRows((previous) => {
+          const externals = sameGroup
+            ? previous.filter((row) => row.external)
+            : []
+          const previousById = new Map(previous.map((row) => [row.id, row]))
+
+          const groupRows: Row[] = data.participants.map((participant) => {
+            const old = previousById.get(participant.id)
+            return {
+              ...participant,
+              participates: old?.participates ?? true,
+              hasPhone: old?.hasPhone ?? true,
+              representative: old?.representative ?? "",
+              external: false,
+            }
+          })
+
+          const validRepresentatives = new Set(
+            groupRows
+              .filter((row) => row.participates && row.hasPhone)
+              .map((row) => row.id),
+          )
+
+          return [
+            ...groupRows,
+            ...externals.map((row) => ({
+              ...row,
+              representative: validRepresentatives.has(row.representative)
+                ? row.representative
+                : "",
+            })),
+          ]
+        })
+      } catch (err) {
+        setError(errorMessage(err))
+      } finally {
+        setLoadingPeople(false)
+      }
+    },
+    [groupId],
+  )
+
+  const addExternal = useCallback(() => {
+    const name = externalName.trim()
+    if (!name) return
+
+    const suffix =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+
     setSummary(null)
-    setError(null)
-    if (!id) return
+    setProgress([])
+    setRows((previous) => [
+      ...previous,
+      {
+        id: `externo-${suffix}`,
+        name,
+        participates: true,
+        hasPhone: false,
+        representative: "",
+        external: true,
+      },
+    ])
+    setExternalName("")
+  }, [externalName])
 
-    setLoadingPeople(true)
-    try {
-      const data = await apiJson<{
-        subject: string
-        participants: { id: string; name: string }[]
-      }>(`/api/participants?groupId=${encodeURIComponent(id)}`)
-
-      setGroupSubject(data.subject)
-      setRows(
-        data.participants.map((participant) => ({
-          ...participant,
-          participates: true,
-          hasPhone: true,
-          representative: "",
-        })),
-      )
-    } catch (err) {
-      setError(errorMessage(err))
-    } finally {
-      setLoadingPeople(false)
-    }
+  const removeExternal = useCallback((id: string) => {
+    setSummary(null)
+    setProgress([])
+    setRows((previous) => previous.filter((row) => row.id !== id))
   }, [])
 
   const patchRow = useCallback((id: string, patch: Partial<Row>) => {
@@ -541,6 +606,7 @@ export default function Home() {
             id: row.id,
             name: row.name.trim(),
             hasPhone: row.hasPhone,
+            external: row.external === true,
           })),
           representatives: Object.fromEntries(
             phoneLessRows.map((row) => [row.id, row.representative]),
@@ -877,18 +943,27 @@ export default function Home() {
                       }`}
                     >
                       <div className="flex min-h-14 items-center gap-3 px-3 py-2">
-                        <input
-                          id={`part-${row.id}`}
-                          type="checkbox"
-                          aria-label={`Incluir ${row.name || "esta pessoa"} no sorteio`}
-                          checked={row.participates}
-                          onChange={(event) =>
-                            patchRow(row.id, {
-                              participates: event.target.checked,
-                            })
-                          }
-                          className="h-6 w-6 shrink-0 accent-emerald-700"
-                        />
+                        {row.external ? (
+                          <span
+                            aria-hidden
+                            className="flex h-6 w-6 shrink-0 items-center justify-center text-lg"
+                          >
+                            👤
+                          </span>
+                        ) : (
+                          <input
+                            id={`part-${row.id}`}
+                            type="checkbox"
+                            aria-label={`Incluir ${row.name || "esta pessoa"} no sorteio`}
+                            checked={row.participates}
+                            onChange={(event) =>
+                              patchRow(row.id, {
+                                participates: event.target.checked,
+                              })
+                            }
+                            className="h-6 w-6 shrink-0 accent-emerald-700"
+                          />
+                        )}
                         <div className="min-w-0 flex-1">
                           {editingId === row.id ? (
                             <input
@@ -931,7 +1006,11 @@ export default function Home() {
                           )}
                         </div>
 
-                        {row.participates ? (
+                        {row.external ? (
+                          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900">
+                            de fora
+                          </span>
+                        ) : row.participates ? (
                           <div className="flex shrink-0 items-center gap-2">
                             <label
                               htmlFor={`phone-${row.id}`}
@@ -959,12 +1038,24 @@ export default function Home() {
 
                       {row.participates && !row.hasPhone && (
                         <div className="border-t border-stone-100 px-3 pb-3 pt-2">
-                          <label
-                            htmlFor={`rep-${row.id}`}
-                            className="text-base font-semibold text-stone-800"
-                          >
-                            Quem vai avisar {row.name}?
-                          </label>
+                          <div className="flex items-center justify-between gap-3">
+                            <label
+                              htmlFor={`rep-${row.id}`}
+                              className="text-base font-semibold text-stone-800"
+                            >
+                              Quem vai avisar {row.name}?
+                            </label>
+                            {row.external && (
+                              <button
+                                type="button"
+                                onClick={() => removeExternal(row.id)}
+                                aria-label={`Remover ${row.name || "pessoa"} do sorteio`}
+                                className="shrink-0 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                              >
+                                Remover
+                              </button>
+                            )}
+                          </div>
                           <select
                             id={`rep-${row.id}`}
                             value={row.representative}
@@ -989,8 +1080,9 @@ export default function Home() {
                               ))}
                           </select>
                           <p className="mt-2 text-sm leading-6 text-stone-600">
-                            Essa pessoa recebe o nome de {row.name} e avisa
-                            pessoalmente. {row.name} continua dando presente.
+                            {row.external
+                              ? `Como ${row.name} não está no grupo, o nome vai só para quem avisa, pessoalmente.`
+                              : `Essa pessoa recebe o nome de ${row.name} e avisa pessoalmente. ${row.name} continua dando presente.`}
                           </p>
                         </div>
                       )}
@@ -998,10 +1090,48 @@ export default function Home() {
                   ))}
                 </ul>
 
+                <div className="mt-4 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3">
+                  <p className="text-base font-semibold text-stone-800">
+                    Pessoa de fora do grupo
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-stone-600">
+                    Ela participa do sorteio e dá presente, mas não está no
+                    grupo: quem avisa recebe o nome e conta pessoalmente.
+                  </p>
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                    <input
+                      value={externalName}
+                      onChange={(event) => setExternalName(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault()
+                          addExternal()
+                        }
+                      }}
+                      aria-label="Nome da pessoa de fora do grupo"
+                      placeholder="Nome da pessoa"
+                      maxLength={60}
+                      className="min-h-12 w-full rounded-2xl border border-stone-300 bg-white px-4 py-2.5 text-base text-stone-900 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={addExternal}
+                      disabled={!externalName.trim()}
+                      className="min-h-12 shrink-0 rounded-2xl bg-emerald-700 px-5 py-2.5 text-base font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                </div>
+
                 <p className="mt-4 text-sm text-stone-600">
                   {activeRows.length} pessoas no sorteio
                   {phoneLessRows.length > 0 &&
-                    ` · ${phoneLessRows.length} sem celular · ${
+                    ` · ${phoneLessRows.length} sem celular${
+                      activeRows.filter((row) => row.external).length > 0
+                        ? ` (${activeRows.filter((row) => row.external).length} de fora)`
+                        : ""
+                    } · ${
                       phoneLessRows.filter((row) => row.representative).length
                     } com quem avisa`}
                 </p>

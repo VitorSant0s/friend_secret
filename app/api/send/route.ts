@@ -2,12 +2,11 @@ import {
   buildDeliveryPlan,
   drawSecretSanta,
   validateSetup,
-  type Participant,
   type Representatives,
 } from "@/lib/draw"
 import { invalidSession, requestSessionId } from "@/lib/api-session"
 import { formatMessage } from "@/lib/message"
-import { sanitizeName } from "@/lib/names"
+import { buildPeople } from "@/lib/participants"
 import { SessionExpiredError } from "@/lib/session"
 import {
   TooManySessionsError,
@@ -22,7 +21,12 @@ export const dynamic = "force-dynamic"
 type Body = {
   groupId?: string
   date?: string
-  people?: { id?: string; name?: string; hasPhone?: boolean }[]
+  people?: {
+    id?: string
+    name?: string
+    hasPhone?: boolean
+    external?: boolean
+  }[]
   representatives?: Record<string, string>
 }
 
@@ -45,28 +49,12 @@ export async function POST(request: Request) {
     }
 
     const details = await groupDetails(sessionId, groupId)
-    const groupById = new Map(details.participants.map((p) => [p.id, p]))
-    const seen = new Set<string>()
+    if (body.people.length > 300) {
+      throw new Error("Participantes demais para um sorteio só.")
+    }
 
-    const participants: Participant[] = body.people.map((person) => {
-      const id = person.id?.trim()
-      if (!id) throw new Error("Um dos participantes está sem identificação.")
-      if (seen.has(id)) throw new Error("A lista tem participantes repetidos.")
-      seen.add(id)
-
-      const fromGroup = groupById.get(id)
-      if (!fromGroup) {
-        throw new Error(
-          "Alguém da lista saiu do grupo. Atualize a lista de participantes.",
-        )
-      }
-
-      return {
-        id,
-        name: sanitizeName(person.name) || fromGroup.name,
-        hasPhone: person.hasPhone !== false,
-      }
-    })
+    const participants = buildPeople(details.participants, body.people)
+    const seen = new Set(participants.map((participant) => participant.id))
 
     const representatives: Representatives = {}
     for (const [representedId, representativeId] of Object.entries(
