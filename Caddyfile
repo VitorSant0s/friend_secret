@@ -1,8 +1,0 @@
-{$DOMAIN} {
-	encode zstd gzip
-
-	reverse_proxy app:3000 {
-		# deixa o envio das mensagens chegar ao navegador sem ficar em buffer
-		flush_interval -1
-	}
-}

@@ -147,12 +147,14 @@ Precisa de uma VPS com Docker e Docker Compose, um subdomínio (por exemplo
 git clone <seu-repositorio> amigo-secreto
 cd amigo-secreto
 cp .env.example .env
-# edite o .env: DOMAIN, ALLOWED_ORIGIN, PIX_KEY, PIX_NAME, PIX_CITY
+# edite o .env: DOMAIN, CERTBOT_EMAIL, ALLOWED_ORIGIN, PIX_KEY, PIX_NAME, PIX_CITY
 docker compose up -d --build
 docker compose logs -f app
 ```
 
-O Caddy cuida do HTTPS sozinho. Confira com:
+O nginx emite o certificado com o Let's Encrypt e renova sozinho. Na primeira
+subida, o DNS do domínio já precisa apontar para a VPS e as portas 80 e 443
+precisam estar abertas — senão a emissão falha e o nginx reinicia. Confira com:
 
 ```bash
 curl https://api.seudominio.com/api/whatsapp/status
@@ -163,6 +165,9 @@ curl https://api.seudominio.com/api/whatsapp/status
   conexões e arquivos separados.
 - Atualizar: `git pull && docker compose up -d --build`.
 - Firewall: deixe exposto apenas 22, 80 e 443.
+- Se o certificado não sair: `docker compose logs nginx`, confira
+  `dig +short api.seudominio.com` e as portas 80/443, depois rode
+  `docker compose up -d`.
 - O motor aceita no máximo `MAX_SESSIONS` sessões ao mesmo tempo; acima disso
   responde com "muitas sessões abertas", protegendo a memória da máquina.
 
