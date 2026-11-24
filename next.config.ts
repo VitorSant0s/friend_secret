@@ -1,9 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  ...(process.env.NEXT_OUTPUT === "export" ? { output: "export" as const } : {}),
+  devIndicators: false,
+  serverExternalPackages: ["@whiskeysockets/baileys", "pino"],
   turbopack: {
     rules: {
       "*.css": {
@@ -12,6 +12,6 @@ const nextConfig: NextConfig = {
       },
     },
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

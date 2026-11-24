@@ -1,36 +1,216 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎁 Amigo Secreto
 
-## Getting Started
+Sorteio de amigo secreto para um grupo do WhatsApp, feito para rodar **no seu
+computador**. Ele conecta na sua conta como o WhatsApp Web, lê os participantes
+do grupo, faz o sorteio e envia uma mensagem privada para cada pessoa.
 
-First, run the development server:
+Cada navegador tem a **própria sessão**, independente: dois navegadores são dois
+aparelhos conectados, cada um com seu QR code. A sessão é guardada no servidor
+até a pessoa desconectar ou completar **1 hora** — e essa hora começa a contar no
+momento em que o QR code é lido.
+
+Quem não tem celular continua participando normalmente: o nome do amigo secreto
+dessa pessoa é entregue a um **representante**, que avisa pessoalmente quem ela
+tirou. A pessoa sem celular compra e entrega o presente dela como todo mundo.
+
+## Requisitos
+
+- Node.js 20 ou mais novo (`node -v`)
+- WhatsApp no celular, para escanear o QR code
+
+## Como rodar
+
+```bash
+npm install
+npm run dev
+```
+
+Abra <http://localhost:3000> no navegador.
+
+## Como usar
+
+1. **Conectar o WhatsApp** — clique em *Conectar WhatsApp* e escaneie o QR code
+   em *Aparelhos conectados*, no celular.
+2. **Escolher o grupo** — a lista vem direto do seu WhatsApp.
+3. **Marcar as exceções** — desmarque quem não participa do sorteio. Para quem
+   não tem celular, desmarque *tem celular* e escolha quem vai avisar essa
+   pessoa.
+4. **Data e envio** — opcionalmente informe o dia da entrega, confira a prévia
+   das mensagens e clique em *Sortear e enviar*.
+
+O sorteio precisa de pelo menos 4 participantes e garante que ninguém tira a si mesmo e que não se formam pares
+trocados (A tira B e B tira A).
+
+As mensagens saem com um intervalo de 2,5 a 5 segundos entre elas. O resultado
+do sorteio **não é salvo em lugar nenhum**: se algo falhar, é preciso sortear de
+novo.
+
+### Privacidade do sorteio
+
+Depois de cada envio, o motor usa o "apagar para mim" do WhatsApp: a mensagem
+sai da **sua conversa**, mas o participante continua com o nome que recebeu.
+Assim o organizador não fica sabendo quem tirou quem.
+
+- A mensagem some da sua conversa em alguns segundos, quando o WhatsApp
+  sincroniza. Se você estiver com o aplicativo aberto, pode vê-la de relance e a
+  notificação do celular pode aparecer no momento do envio.
+- A mensagem que é o **seu próprio amigo secreto** não é apagada: ela fica na
+  sua conversa, para você saber quem tirou. As demais são ocultadas.
+- Se o "apagar para mim" falhar para alguém, a tela avisa na lista e no resumo;
+  nesse caso a mensagem fica na sua conversa e pode ser apagada à mão.
+- Isso vale só para os envios feitos por este programa, e não apaga nada no
+  aparelho de quem recebeu.
+
+## Doações por PIX (opcional)
+
+No fim da página existe um bloco de contribuição: R$ 1 por padrão, com opções de
+R$ 1, 2, 5, 10 e um campo para outro valor. O QR code e o código "copia e cola"
+são gerados na hora, com o valor escolhido já preenchido.
+
+Para ativar, crie um arquivo `.env.local` na pasta do projeto:
+
+```bash
+PIX_KEY=sua-chave-pix
+PIX_NAME=Seu Nome
+PIX_CITY=Sua Cidade
+```
+
+A chave pode ser telefone, e-mail, CPF/CNPJ ou chave aleatória. Depois reinicie o
+`npm run dev`. Sem essas variáveis o bloco aparece com o aviso de que as doações
+não estão configuradas. Nenhuma cobrança é feita automaticamente: a pessoa paga
+no aplicativo do banco dela.
+
+## O que fica guardado
+
+- **No navegador:** apenas um identificador aleatório da sessão, cifrado com
+  AES-GCM. A chave é uma chave não exportável guardada no IndexedDB daquele
+  navegador. Esse bilhete sozinho não dá acesso a nada, e ele é apagado ao
+  completar 1 hora (ou ao clicar em *Desconectar*).
+- **No servidor:** as credenciais do WhatsApp ficam em
+  `.whatsapp-sessions/<sessão>` (ignorada pelo git), uma pasta por navegador, e
+  um arquivo de controle com o início e o fim da validade. Ao escanear, o
+  WhatsApp grava as credenciais nessa pasta; ao expirar ou desconectar, o
+  servidor encerra a conexão e apaga tudo. Sem credenciais, o WhatsApp pede o QR
+  code de novo.
+- **Reinício do motor:** a sessão e a validade continuam no disco. Depois de
+  pareada, a conexão volta sozinha no próximo acesso, sem novo QR code.
+- O sorteio em si existe apenas na memória durante o envio.
+- A chave PIX (se configurada) fica só no servidor e vira um QR code; nada é
+  cobrado automaticamente.
+
+## Aviso
+
+Cada navegador conectado conta como um aparelho no WhatsApp, e o WhatsApp
+permite cerca de 4 aparelhos por conta. Esse limite é por conta, não por
+servidor: seis pessoas, cada uma com o próprio celular, são seis contas
+diferentes e podem usar ao mesmo tempo. O limite de sessões do servidor é
+configurado em `MAX_SESSIONS`.
+
+A conexão usa a biblioteca não oficial Baileys, a mesma tecnologia que outros
+clientes alternativos usam. Não é a API oficial do WhatsApp. Para um uso
+esporádico, como um amigo secreto por ano, o risco de bloqueio é baixo, mas
+existe. Não use para disparos em massa.
+
+## Licença e responsabilidade
+
+O código é aberto sob a licença **MIT** (veja [LICENSE](LICENSE)): pode usar,
+copiar, modificar e vender, mantendo o aviso de copyright. O software é
+fornecido "como está", sem garantias.
+
+Para quem usa o site, há um aviso de responsabilidade publicado em `/termos` e
+resumido no rodapé: uso por conta e risco, sem vínculo com o WhatsApp/Meta, sem
+garantia de entrega das mensagens ou acerto do sorteio, e sem responsabilidade
+por danos, presentes ou valores. O resumo para o repositório está em
+[DISCLAIMER.md](DISCLAIMER.md).
+
+Isso é um aviso de uso, não aconselhamento jurídico. Para uso comercial em
+escala, vale revisar com um advogado.
+
+## Publicar: Netlify (site) + VPS (motor)
+
+A conexão do WhatsApp precisa de um processo sempre ligado, com disco e
+WebSocket. Por isso o site no Netlify é só a interface, e o motor fica numa VPS.
+
+```
+navegador → Netlify (interface estática)
+          → VPS (API + WhatsApp + PIX)
+```
+
+### 1. Motor na VPS
+
+Precisa de uma VPS com Docker e Docker Compose, um subdomínio (por exemplo
+`api.seudominio.com`) apontando para o IP da VPS, e as portas 80 e 443 abertas.
+
+```bash
+git clone <seu-repositorio> amigo-secreto
+cd amigo-secreto
+cp .env.example .env
+# edite o .env: DOMAIN, ALLOWED_ORIGIN, PIX_KEY, PIX_NAME, PIX_CITY
+docker compose up -d --build
+docker compose logs -f app
+```
+
+O Caddy cuida do HTTPS sozinho. Confira com:
+
+```bash
+curl https://api.seudominio.com/api/whatsapp/status
+```
+
+- As sessões ficam no volume `sessions` e sobrevivem a reinícios e atualizações.
+- **Uma instância só.** Não escale horizontalmente: cada instância teria
+  conexões e arquivos separados.
+- Atualizar: `git pull && docker compose up -d --build`.
+- Firewall: deixe exposto apenas 22, 80 e 443.
+- O motor aceita no máximo `MAX_SESSIONS` sessões ao mesmo tempo; acima disso
+  responde com "muitas sessões abertas", protegendo a memória da máquina.
+
+### 2. Site no Netlify
+
+1. Conecte o mesmo repositório no Netlify. O `netlify.toml` já define o build
+   (`npm run build:netlify`) e a pasta publicada (`out`).
+2. Em *Site settings → Environment variables*, crie
+   `NEXT_PUBLIC_API_URL=https://api.seudominio.com` (a URL do motor).
+3. Faça o deploy e copie a URL final do site.
+4. Volte ao `.env` da VPS, coloque essa URL em `ALLOWED_ORIGIN` e rode
+   `docker compose up -d` para liberar o CORS.
+5. Abra o site publicado e escaneie o QR code.
+
+O build do Netlify gera um site estático e tira temporariamente as rotas de API
+do pacote, porque exportação estática não aceita servidor. Sorteio, sessão e
+doação continuam funcionando no navegador, chamando o motor na VPS.
+
+### 3. Rodando local
+
+Sem `NEXT_PUBLIC_API_URL`, o site conversa com o próprio servidor:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Desenvolvimento
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm test               # sorteio, mensagens, PIX e sessão
+npm run lint
+npm run build          # servidor (VPS)
+npm run build:netlify  # site estático em out/ (precisa de NEXT_PUBLIC_API_URL)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Teste de sessões simultâneas
 
-## Learn More
+Com o motor rodando e um limite definido:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+MAX_SESSIONS=6 npm start
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# em outro terminal
+USERS=6 CAP=6 node scripts/security-test.mjs
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+O teste cria seis sessões ao mesmo tempo e confere que: cada uma recebe um QR
+code diferente, todas têm validade própria, a sétima é recusada com 429,
+desconectar uma não derruba as outras e as pastas de credenciais são separadas.
+Use `KEEP=1` para não apagar as sessões no fim.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O pareamento de verdade exige um celular por sessão; o teste valida o servidor,
+os limites e o isolamento.
