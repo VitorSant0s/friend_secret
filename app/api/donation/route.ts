@@ -1,4 +1,5 @@
 import QRCode from "qrcode"
+import { limitRequest, tooManyRequests } from "@/lib/api-limits"
 import { buildPixPayload } from "@/lib/pix"
 import { donationConfig, isDonationConfigured } from "@/lib/pix-config"
 
@@ -9,6 +10,9 @@ const MIN = 1
 const MAX = 1000
 
 export async function GET(request: Request) {
+  const ipLimit = limitRequest(request, "donation-ip", 60, 60_000)
+  if (!ipLimit.allowed) return tooManyRequests(ipLimit)
+
   const raw = new URL(request.url).searchParams.get("amount") ?? ""
   const amount = Number(raw.replace(",", "."))
 

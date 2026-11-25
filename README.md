@@ -189,6 +189,21 @@ curl https://api.seudominio.com/api/whatsapp/status
 - O motor aceita no máximo `MAX_SESSIONS` sessões ao mesmo tempo; acima disso
   responde com "muitas sessões abertas", protegendo a memória da máquina.
 
+### Limites de uso da API
+
+A API é aberta, então cada rota tem limite por IP e por sessão, em memória.
+Ao estourar, responde **429** com `Retry-After`:
+
+- Status: 600 por minuto por IP e 180 por minuto por sessão.
+- Criação de sessão: 10 novas por IP a cada 10 minutos (além do teto global).
+- Envio: 20 por minuto por IP.
+- Grupos, participantes e logout: 120, 120 e 30 por minuto por IP.
+- Doação: 60 por minuto por IP.
+
+Rotas de sessão exigem o cabeçalho `x-session-id`; sem ele a resposta é 401 e
+não devolve nenhum dado. Para proteção contra DDoS, use também o firewall do
+provedor ou um CDN/WAF na frente.
+
 ### 2. Site no Netlify
 
 1. Conecte o mesmo repositório no Netlify. O `netlify.toml` já define o build

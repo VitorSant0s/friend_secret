@@ -248,6 +248,10 @@ export async function ensureSession(id: string): Promise<Session> {
   }
 }
 
+export function sessionExists(id: string): boolean {
+  return store().map.has(id)
+}
+
 export async function destroySession(id: string): Promise<void> {
   const state = store()
   const session = state.map.get(id)

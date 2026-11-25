@@ -4,6 +4,7 @@ import {
   validateSetup,
   type Representatives,
 } from "@/lib/draw"
+import { limitRequest, tooManyRequests } from "@/lib/api-limits"
 import { invalidSession, requestSessionId } from "@/lib/api-session"
 import { formatMessage } from "@/lib/message"
 import { buildPeople } from "@/lib/participants"
@@ -31,6 +32,9 @@ type Body = {
 }
 
 export async function POST(request: Request) {
+  const ipLimit = limitRequest(request, "send-ip", 20, 60_000)
+  if (!ipLimit.allowed) return tooManyRequests(ipLimit)
+
   const sessionId = requestSessionId(request)
   if (!sessionId) return invalidSession()
 

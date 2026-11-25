@@ -1,4 +1,5 @@
-import { requestSessionId } from "@/lib/api-session"
+import { limitRequest, tooManyRequests } from "@/lib/api-limits"
+import { invalidSession, requestSessionId } from "@/lib/api-session"
 import { sessionStatus } from "@/lib/whatsapp"
 
 export const runtime = "nodejs"
@@ -14,8 +15,19 @@ const EMPTY = {
 } as const
 
 export async function GET(request: Request) {
+  const ipLimit = limitRequest(request, "status-ip", 600, 60_000)
+  if (!ipLimit.allowed) return tooManyRequests(ipLimit)
+
   const id = requestSessionId(request)
-  if (!id) return Response.json(EMPTY, { headers: { "Cache-Control": "no-store" } })
+  if (!id) return invalidSession()
+
+  const sessionLimit = limitRequest(
+    request,
+    `status-session-${id}`,
+    180,
+    60_000,
+  )
+  if (!sessionLimit.allowed) return tooManyRequests(sessionLimit)
 
   try {
     return Response.json(await sessionStatus(id), {
