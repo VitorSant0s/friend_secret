@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import DonationCard from "@/app/donation-card"
 import Guide from "@/app/guide"
+import { expiryNotice } from "@/lib/expiry-notice"
 import { formatMessage } from "@/lib/message"
 import {
   apiFetch,
@@ -239,9 +240,14 @@ export default function Home() {
   const [guideHint, setGuideHint] = useState(false)
   const autoStarted = useRef(false)
   const restarting = useRef(false)
+  const snapshotRef = useRef<Snapshot | null>(null)
 
   const connected = snapshot?.status === "connected"
   const loadingGroups = connected && !groupsLoaded
+
+  useEffect(() => {
+    snapshotRef.current = snapshot
+  }, [snapshot])
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -317,9 +323,7 @@ export default function Home() {
 
     const remaining = session.expiresAt - Date.now()
     const timer = setTimeout(() => {
-      void restartSession(
-        "A conexão de 15 minutos terminou. Leia o código do WhatsApp de novo para continuar.",
-      )
+      void restartSession(expiryNotice(snapshotRef.current?.status))
     }, Math.max(remaining, 0))
 
     return () => clearTimeout(timer)
@@ -335,9 +339,7 @@ export default function Home() {
         )
         if (!active) return
         if (data.expired) {
-          void restartSession(
-            "A conexão de 15 minutos terminou. Leia o código do WhatsApp de novo para continuar.",
-          )
+          void restartSession(expiryNotice(snapshotRef.current?.status))
           return
         }
 
