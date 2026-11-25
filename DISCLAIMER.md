@@ -1,4 +1,4 @@
-# Licença e aviso de responsabilidade
+# Licença e responsabilidade
 
 ## Licença
 
@@ -9,27 +9,37 @@ software, desde que mantenha o aviso de copyright e a licença.
 O software é fornecido **"como está"**, sem garantias de qualquer tipo, e os
 autores não respondem por danos decorrentes do uso.
 
-## Aviso para quem usa o site publicado
+## Documentos do serviço publicado
 
-A licença MIT protege quem distribui o código. Para quem usa o serviço pela
-internet, vale o aviso abaixo (também publicado em `/termos` na aplicação):
+A licença cobre o código. Para quem usa o site publicado, valem os documentos da
+aplicação:
 
-- O site é uma ferramenta gratuita, fornecida **como está**, sem garantia de
-  disponibilidade, funcionamento, entrega das mensagens ou acerto do sorteio.
-- **Não há vínculo com o WhatsApp ou com a Meta.** A conexão usa uma biblioteca
-  não oficial, sujeita aos termos do WhatsApp e a bloqueios de conta. Cada pessoa
-  usa por sua conta e risco.
-- O autor e quem hospeda o serviço **não se responsabilizam** por danos diretos
-  ou indiretos, presentes, dinheiro, perda de dados, mensagens não entregues,
-  sorteios errados, bloqueio de conta, lucros cessantes ou qualquer prejuízo
-  decorrente do uso.
-- **Doações são voluntárias** e acontecem por PIX direto entre quem doa e quem
-  recebe. O software não processa pagamentos, não garante reembolso e não
-  intermedeia valores.
-- Nada neste aviso exclui direitos que a lei garanta ao consumidor.
+- **Termos de Uso** — `/termos`
+- **Política de Privacidade (LGPD)** — `/privacidade`
+
+Eles tratam de: declarações do organizador (autorização dos participantes),
+riscos do WhatsApp (bloqueio, entrega), doações, propriedade intelectual,
+limitação de responsabilidade com ressalva dos direitos do consumidor, dados
+pessoais, bases legais, retenção, compartilhamento, transferência internacional,
+segurança, incidentes (3 dias úteis, conforme Resolução ANPD 15/2024) e direitos
+do titular (art. 18 da LGPD).
+
+## Antes de publicar
+
+1. Preencha os dados do responsável em [`lib/legal.ts`](lib/legal.ts):
+   nome/razão social, CPF/CNPJ, cidade/UF, e-mail de contato, e-mail do
+   encarregado, hospedagem e prazo de guarda dos logs. Enquanto houver campos
+   vazios ou com "PREENCHER", as páginas mostram um aviso vermelho.
+2. Ajuste a retenção de logs do servidor para o prazo informado na Política.
+   Os serviços do `docker-compose.yml` já limitam o tamanho dos logs; guarda por
+   tempo exige rotação externa (ex.: logrotate).
+3. Revise os textos com um advogado, especialmente se o uso for comercial ou
+   envolver dados de terceiros em escala.
+4. O aceite é obrigatório antes de enviar o sorteio e aparece no diálogo de
+   confirmação, com links para os dois documentos.
 
 ## Não é aconselhamento jurídico
 
-Este texto é um aviso de uso, não uma opinião jurídica. Se o uso for comercial
-ou envolver dados de terceiros em escala, vale revisar com um advogado,
-especialmente LGPD, direitos do consumidor e os termos do WhatsApp.
+Estes textos são um ponto de partida técnico, não uma opinião jurídica. Para
+produção, recomenda-se revisão por advogado, com atenção à LGPD, ao CDC, ao
+Marco Civil e aos termos do WhatsApp.

@@ -113,20 +113,31 @@ clientes alternativos usam. Não é a API oficial do WhatsApp. Para um uso
 esporádico, como um amigo secreto por ano, o risco de bloqueio é baixo, mas
 existe. Não use para disparos em massa.
 
-## Licença e responsabilidade
+## Licença, termos e privacidade
 
 O código é aberto sob a licença **MIT** (veja [LICENSE](LICENSE)): pode usar,
 copiar, modificar e vender, mantendo o aviso de copyright. O software é
 fornecido "como está", sem garantias.
 
-Para quem usa o site, há um aviso de responsabilidade publicado em `/termos` e
-resumido no rodapé: uso por conta e risco, sem vínculo com o WhatsApp/Meta, sem
-garantia de entrega das mensagens ou acerto do sorteio, e sem responsabilidade
-por danos, presentes ou valores. O resumo para o repositório está em
-[DISCLAIMER.md](DISCLAIMER.md).
+O site publicado tem dois documentos, com aceite obrigatório antes de enviar o
+sorteio:
 
-Isso é um aviso de uso, não aconselhamento jurídico. Para uso comercial em
-escala, vale revisar com um advogado.
+- **Termos de Uso** em `/termos`: declarações do organizador, uso aceitável,
+  riscos do WhatsApp, doações, propriedade intelectual e limitação de
+  responsabilidade.
+- **Política de Privacidade** em `/privacidade`: controlador e operador, dados
+  tratados, bases legais, retenção, compartilhamento, segurança, incidentes e
+  direitos do titular (LGPD).
+
+Antes de colocar em produção, preencha os dados do responsável em
+[`lib/legal.ts`](lib/legal.ts) (nome/razão social, documento, cidade, e-mails,
+hospedagem e prazo de logs). Enquanto faltar algum, as páginas mostram um aviso
+vermelho. O guia está em [DISCLAIMER.md](DISCLAIMER.md).
+
+Ajuste a guarda dos logs para o prazo informado. O compose limita o tamanho dos
+logs; para prazo por tempo, use rotação externa (logrotate).
+
+Não é aconselhamento jurídico: para produção, revise com um advogado.
 
 ## Publicar: Netlify (site) + VPS (motor)
 

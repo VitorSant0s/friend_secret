@@ -112,6 +112,7 @@ function Dialog({
   children,
   confirmLabel,
   confirmTone = "emerald",
+  confirmDisabled = false,
   onConfirm,
   onClose,
 }: {
@@ -120,6 +121,7 @@ function Dialog({
   children: React.ReactNode
   confirmLabel: string
   confirmTone?: "emerald" | "red"
+  confirmDisabled?: boolean
   onConfirm: () => void
   onClose: () => void
 }) {
@@ -196,7 +198,8 @@ function Dialog({
           <button
             type="button"
             onClick={onConfirm}
-            className={`min-h-13 rounded-2xl px-5 py-3 text-base font-semibold text-white transition ${
+            disabled={confirmDisabled}
+            className={`min-h-13 rounded-2xl px-5 py-3 text-base font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${
               confirmTone === "red"
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-emerald-700 hover:bg-emerald-800"
@@ -239,6 +242,7 @@ export default function Home() {
   const [now, setNow] = useState(() => Date.now())
   const [editingId, setEditingId] = useState<string | null>(null)
   const [externalName, setExternalName] = useState("")
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const autoStarted = useRef(false)
   const restarting = useRef(false)
 
@@ -669,6 +673,7 @@ export default function Home() {
       setError(validationError)
       return
     }
+    setAcceptedTerms(false)
     setDialog("send")
   }, [validationError])
 
@@ -1330,12 +1335,23 @@ export default function Home() {
           <p className="mt-1">
             Uso por sua conta e risco. Sem vínculo com o WhatsApp ou a Meta.
           </p>
-          <Link
-            href="/termos"
-            className="mt-2 inline-block font-semibold text-emerald-800 underline underline-offset-4"
+          <nav
+            aria-label="Documentos legais"
+            className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1"
           >
-            Termos e aviso de responsabilidade
-          </Link>
+            <Link
+              href="/termos"
+              className="font-semibold text-emerald-800 underline underline-offset-4"
+            >
+              Termos de Uso
+            </Link>
+            <Link
+              href="/privacidade"
+              className="font-semibold text-emerald-800 underline underline-offset-4"
+            >
+              Política de Privacidade
+            </Link>
+          </nav>
         </footer>
       </main>
 
@@ -1368,6 +1384,7 @@ export default function Home() {
         open={dialog === "send"}
         title="Confirmar o sorteio?"
         confirmLabel="Sim, sortear e enviar"
+        confirmDisabled={!acceptedTerms}
         onClose={() => setDialog(null)}
         onConfirm={() => {
           setDialog(null)
@@ -1394,6 +1411,41 @@ export default function Home() {
         <p className="rounded-xl bg-amber-50 px-3 py-2 text-amber-900">
           Depois de enviar não dá para desfazer.
         </p>
+
+        <label
+          htmlFor="accept-terms"
+          className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm leading-6 text-stone-700"
+        >
+          <input
+            id="accept-terms"
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(event) => setAcceptedTerms(event.target.checked)}
+            className="mt-1 h-5 w-5 shrink-0 accent-emerald-700"
+          />
+          <span>
+            Declaro que avisei as pessoas incluídas e tenho autorização para
+            usar o nome e o número delas neste sorteio. Li e aceito os{" "}
+            <a
+              href="/termos"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-emerald-800 underline underline-offset-2"
+            >
+              Termos de Uso
+            </a>{" "}
+            e a{" "}
+            <a
+              href="/privacidade"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-emerald-800 underline underline-offset-2"
+            >
+              Política de Privacidade
+            </a>
+            .
+          </span>
+        </label>
       </Dialog>
 
       <Dialog

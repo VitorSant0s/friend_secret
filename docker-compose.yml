@@ -11,6 +11,11 @@ services:
       - sessions:/app/.whatsapp-sessions
     expose:
       - "3000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   nginx:
     build: ./nginx
@@ -25,6 +30,11 @@ services:
       - "443:443"
     volumes:
       - letsencrypt:/etc/letsencrypt
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 volumes:
   sessions:
