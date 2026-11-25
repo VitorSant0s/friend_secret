@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import DonationCard from "@/app/donation-card"
+import Guide from "@/app/guide"
 import { formatMessage } from "@/lib/message"
 import {
   apiFetch,
@@ -234,11 +235,38 @@ export default function Home() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [externalName, setExternalName] = useState("")
   const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
+  const [guideHint, setGuideHint] = useState(false)
   const autoStarted = useRef(false)
   const restarting = useRef(false)
 
   const connected = snapshot?.status === "connected"
   const loadingGroups = connected && !groupsLoaded
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      try {
+        setGuideHint(!window.localStorage.getItem("amigo-secreto.guia.v1"))
+      } catch {
+        setGuideHint(true)
+      }
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  const markGuideSeen = useCallback(() => {
+    try {
+      window.localStorage.setItem("amigo-secreto.guia.v1", "1")
+    } catch {
+      // sem localStorage, o convite pode voltar; o guia continua no topo
+    }
+    setGuideHint(false)
+  }, [])
+
+  const openGuide = useCallback(() => {
+    markGuideSeen()
+    setGuideOpen(true)
+  }, [markGuideSeen])
 
   const restartSession = useCallback(async (message?: string) => {
     if (restarting.current) return
@@ -701,7 +729,7 @@ export default function Home() {
           <span className="text-3xl" aria-hidden>
             🎁
           </span>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold leading-tight text-stone-900">
               Amigo Secreto
             </h1>
@@ -709,6 +737,14 @@ export default function Home() {
               Sorteio fácil, direto no WhatsApp
             </p>
           </div>
+          <button
+            type="button"
+            onClick={openGuide}
+            aria-label="Abrir o guia rápido"
+            className="min-h-11 shrink-0 rounded-xl border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
+          >
+            Guia
+          </button>
         </div>
       </header>
 
@@ -716,6 +752,36 @@ export default function Home() {
         id="conteudo"
         className="mx-auto w-full max-w-2xl px-4 pb-36 pt-5 sm:pb-12"
       >
+        {guideHint && (
+          <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center">
+            <div className="flex-1">
+              <p className="text-base font-semibold text-emerald-950">
+                Primeira vez por aqui?
+              </p>
+              <p className="text-sm leading-6 text-emerald-900">
+                O guia mostra o passo a passo, do QR code ao envio. É opcional e
+                pode ser fechado quando quiser.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={openGuide}
+                className="min-h-11 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              >
+                Abrir guia
+              </button>
+              <button
+                type="button"
+                onClick={markGuideSeen}
+                className="min-h-11 rounded-xl border border-emerald-300 px-4 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100"
+              >
+                Agora não
+              </button>
+            </div>
+          </div>
+        )}
+
         <ol className="mb-5 flex items-center justify-between gap-1">
           {STEPS.map((label, index) => {
             const active = index === currentStep
@@ -1369,6 +1435,13 @@ export default function Home() {
             </button>
           </div>
         </div>
+      )}
+
+      {guideOpen && (
+        <Guide
+          initialStep={summary ? 4 : Math.min(currentStep, 3)}
+          onClose={() => setGuideOpen(false)}
+        />
       )}
 
       <Dialog
