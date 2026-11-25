@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   return Response.json({
     status: "idle",
     qr: null,
-    me: null,
+    account: null,
     error: null,
     expiresAt: null,
     expired: false,

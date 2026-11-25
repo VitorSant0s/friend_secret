@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 const EMPTY = {
   status: "idle",
   qr: null,
-  me: null,
+  account: null,
   error: null,
   expiresAt: null,
   expired: true,

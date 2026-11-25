@@ -18,7 +18,7 @@ type ConnectionStatus = "idle" | "connecting" | "qr" | "connected" | "error"
 type Snapshot = {
   status: ConnectionStatus
   qr: string | null
-  me: string | null
+  account: string | null
   error: string | null
   expiresAt?: number | null
 }
@@ -57,15 +57,6 @@ type DialogKind = "send" | "logout" | null
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
-}
-
-function prettyNumber(id: string | null): string {
-  if (!id) return ""
-  const digits = id.split("@")[0].split(":")[0]
-  if (digits.length >= 12) {
-    return `+${digits.slice(0, 2)} ${digits.slice(2, 4)} ${digits.slice(4, 9)}-${digits.slice(9)}`
-  }
-  return digits
 }
 
 function Spinner({ big = false }: { big?: boolean }) {
@@ -790,7 +781,7 @@ export default function Home() {
                       WhatsApp conectado
                     </p>
                     <p className="text-sm text-emerald-800">
-                      {prettyNumber(snapshot?.me ?? null)}
+                      {snapshot?.account ?? "Conta conectada"}
                     </p>
                     {minutesLeft !== null && (
                       <p className="mt-1 text-xs text-emerald-800">

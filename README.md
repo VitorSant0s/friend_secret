@@ -177,6 +177,8 @@ curl https://api.seudominio.com/api/whatsapp/status
 ```
 
 - As sessões ficam no volume `sessions` e sobrevivem a reinícios e atualizações.
+- A API responde com `Cache-Control: no-store`, devolve o número conectado
+  mascarado (`+55 11 *****-1234`) e não libera CORS sem `ALLOWED_ORIGIN`.
 - **Uma instância só.** Não escale horizontalmente: cada instância teria
   conexões e arquivos separados.
 - Atualizar: `git pull && docker compose up -d --build`.
@@ -195,7 +197,8 @@ curl https://api.seudominio.com/api/whatsapp/status
    `NEXT_PUBLIC_API_URL=https://api.seudominio.com` (a URL do motor).
 3. Faça o deploy e copie a URL final do site.
 4. Volte ao `.env` da VPS, coloque essa URL em `ALLOWED_ORIGIN` e rode
-   `docker compose up -d` para liberar o CORS.
+   `docker compose up -d` para liberar o CORS. Com `ALLOWED_ORIGIN` vazio, a API
+   só responde ao próprio domínio; não use `*` em produção.
 5. Abra o site publicado e escaneie o QR code.
 
 O build do Netlify gera um site estático e tira temporariamente as rotas de API

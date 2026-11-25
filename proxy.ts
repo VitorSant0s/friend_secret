@@ -3,10 +3,16 @@ import { NextResponse, type NextRequest } from "next/server"
 const ALLOWED_HEADERS = "content-type, x-session-id"
 
 function corsHeaders(request: NextRequest): Record<string, string> {
-  const configured = process.env.ALLOWED_ORIGIN?.trim() || "*"
+  const configured = process.env.ALLOWED_ORIGIN?.trim()
   const origin = request.headers.get("origin")
-  const allowOrigin =
-    configured === "*" ? "*" : origin === configured ? origin : null
+  // Sem ALLOWED_ORIGIN, só o próprio domínio acessa (same-origin não precisa de CORS).
+  const allowOrigin = !configured
+    ? null
+    : configured === "*"
+      ? "*"
+      : origin === configured
+        ? origin
+        : null
 
   const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -15,7 +21,8 @@ function corsHeaders(request: NextRequest): Record<string, string> {
     Vary: "Origin",
   }
 
-  if (allowOrigin) headers["Access-Control-Allow-Origin"] = allowOrigin
+  if (!allowOrigin) return { Vary: "Origin" }
+  headers["Access-Control-Allow-Origin"] = allowOrigin
   return headers
 }
 
@@ -31,6 +38,8 @@ export function proxy(request: NextRequest) {
   for (const [key, value] of Object.entries(corsHeaders(request))) {
     response.headers.set(key, value)
   }
+  response.headers.set("Cache-Control", "no-store")
+  response.headers.set("X-Content-Type-Options", "nosniff")
   return response
 }
 

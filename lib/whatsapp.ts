@@ -10,6 +10,7 @@ import makeWASocket, {
 } from "@whiskeysockets/baileys"
 import pino from "pino"
 import QRCode from "qrcode"
+import { maskAccount } from "@/lib/account"
 import { delay } from "@/lib/delay"
 import { hideMessageForSender } from "@/lib/hide-message"
 import { isOwnChat } from "@/lib/self-chat"
@@ -25,7 +26,8 @@ export type ConnectionStatus = "idle" | "connecting" | "qr" | "connected" | "err
 export type ConnectionSnapshot = {
   status: ConnectionStatus
   qr: string | null
-  me: string | null
+  /** Número mascarado, só para reconhecer a conta conectada. */
+  account: string | null
   error: string | null
   expiresAt: number | null
 }
@@ -167,8 +169,8 @@ function baseSnapshot(session: Session): ConnectionSnapshot {
   return {
     status: session.status,
     qr: session.qr,
-    me: session.me,
-    error: session.error,
+    account: maskAccount(session.me),
+    error: session.error ? session.error.slice(0, 160) : null,
     expiresAt: session.expiresAt,
   }
 }
@@ -286,7 +288,7 @@ export async function sessionStatus(
       return {
         status: "idle",
         qr: null,
-        me: null,
+        account: null,
         error: null,
         expiresAt: null,
         expired: true,
@@ -302,7 +304,7 @@ export async function sessionStatus(
       return {
         status: "idle",
         qr: null,
-        me: null,
+        account: null,
         error: null,
         expiresAt: null,
         expired: true,
@@ -311,7 +313,7 @@ export async function sessionStatus(
     return {
       status: "idle",
       qr: null,
-      me: null,
+      account: null,
       error: null,
       expiresAt: meta.expiresAt,
       expired: false,
@@ -321,7 +323,7 @@ export async function sessionStatus(
   return {
     status: "idle",
     qr: null,
-    me: null,
+    account: null,
     error: null,
     expiresAt: null,
     expired: false,
