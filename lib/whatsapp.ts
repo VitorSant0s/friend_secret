@@ -396,7 +396,7 @@ export async function connect(id: string): Promise<void> {
         session.starting = null
         session.me = sock.user?.id ?? null
         session.groups = null
-        // A contagem de 1 hora começa quando o QR é lido.
+        // A contagem de 15 minutos começa quando o QR é lido.
         session.expiresAt = Date.now() + SESSION_TTL_MS
         void writeMeta(id, {
           createdAt: session.createdAt,

@@ -6,7 +6,7 @@ do grupo, faz o sorteio e envia uma mensagem privada para cada pessoa.
 
 Cada navegador tem a **própria sessão**, independente: dois navegadores são dois
 aparelhos conectados, cada um com seu QR code. A sessão é guardada no servidor
-até a pessoa desconectar ou completar **1 hora** — e essa hora começa a contar no
+até a pessoa desconectar ou completar **15 minutos** — e esse tempo começa a contar no
 momento em que o QR code é lido.
 
 Quem não tem celular continua participando normalmente: o nome do amigo secreto
@@ -87,7 +87,7 @@ no aplicativo do banco dela.
 - **No navegador:** apenas um identificador aleatório da sessão, cifrado com
   AES-GCM. A chave é uma chave não exportável guardada no IndexedDB daquele
   navegador. Esse bilhete sozinho não dá acesso a nada, e ele é apagado ao
-  completar 1 hora (ou ao clicar em *Desconectar*).
+  completar 15 minutos (ou ao clicar em *Desconectar*).
 - **No servidor:** as credenciais do WhatsApp ficam em
   `.whatsapp-sessions/<sessão>` (ignorada pelo git), uma pasta por navegador, e
   um arquivo de controle com o início e o fim da validade. Ao escanear, o

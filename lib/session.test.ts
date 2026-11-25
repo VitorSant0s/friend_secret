@@ -26,15 +26,15 @@ describe("isValidSessionId", () => {
 describe("expiração", () => {
   const now = 1_700_000_000_000
 
-  it("vale por uma hora", () => {
-    expect(SESSION_TTL_MS).toBe(60 * 60 * 1000)
+  it("vale por quinze minutos", () => {
+    expect(SESSION_TTL_MS).toBe(15 * 60 * 1000)
   })
 
-  it("continua válida antes de uma hora", () => {
-    expect(sessionIsExpired(now - 59 * 60 * 1000, now)).toBe(false)
+  it("continua válida antes do limite", () => {
+    expect(sessionIsExpired(now - 14 * 60 * 1000, now)).toBe(false)
   })
 
-  it("expira ao completar uma hora", () => {
+  it("expira ao completar quinze minutos", () => {
     expect(sessionIsExpired(now - SESSION_TTL_MS, now)).toBe(true)
     expect(sessionIsExpired(now - SESSION_TTL_MS - 1, now)).toBe(true)
   })

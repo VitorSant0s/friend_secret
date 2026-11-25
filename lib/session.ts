@@ -1,4 +1,4 @@
-export const SESSION_TTL_MS = 60 * 60 * 1000
+export const SESSION_TTL_MS = 15 * 60 * 1000
 
 const SESSION_ID_PATTERN = /^[a-zA-Z0-9-]{16,64}$/
 
@@ -20,7 +20,7 @@ export function hasExpired(expiresAt: number, now = Date.now()): boolean {
 
 export class SessionExpiredError extends Error {
   constructor() {
-    super("A sessão de 1 hora terminou. Escaneie o código do WhatsApp de novo.")
+    super("A sessão de 15 minutos terminou. Escaneie o código do WhatsApp de novo.")
     this.name = "SessionExpiredError"
   }
 }

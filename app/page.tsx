@@ -290,7 +290,7 @@ export default function Home() {
     }
   }, [])
 
-  // A sessão deste navegador vive no localStorage, cifrada, e dura 1 hora.
+  // A sessão deste navegador vive no localStorage, cifrada, e dura 15 minutos.
   useEffect(() => {
     let active = true
 
@@ -318,7 +318,7 @@ export default function Home() {
     const remaining = session.expiresAt - Date.now()
     const timer = setTimeout(() => {
       void restartSession(
-        "A sessão de 1 hora terminou. Escaneie o código do WhatsApp de novo para continuar.",
+        "A sessão de 15 minutos terminou. Escaneie o código do WhatsApp de novo para continuar.",
       )
     }, Math.max(remaining, 0))
 
@@ -336,7 +336,7 @@ export default function Home() {
         if (!active) return
         if (data.expired) {
           void restartSession(
-            "A sessão de 1 hora terminou. Escaneie o código do WhatsApp de novo para continuar.",
+            "A sessão de 15 minutos terminou. Escaneie o código do WhatsApp de novo para continuar.",
           )
           return
         }
@@ -851,7 +851,7 @@ export default function Home() {
                     </p>
                     {minutesLeft !== null && (
                       <p className="mt-1 text-xs text-emerald-800">
-                        Esta sessão vale por 1 hora — restam cerca de{" "}
+                        Esta sessão vale por 15 minutos — restam cerca de{" "}
                         {minutesLeft} min.
                       </p>
                     )}
@@ -901,7 +901,7 @@ export default function Home() {
                       <Spinner big /> Preparando o código…
                     </p>
                     <p className="mt-2 text-sm text-stone-600">
-                      Isso leva alguns segundos. A conexão vale por 1 hora.
+                      Isso leva alguns segundos. A conexão vale por 15 minutos.
                     </p>
                   </div>
                 )}

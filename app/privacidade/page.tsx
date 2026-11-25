@@ -121,13 +121,13 @@ export default function PrivacyPage() {
                 <td className="py-2 pr-3">Número conectado e credenciais</td>
                 <td className="py-2 pr-3">Manter a conexão e enviar as mensagens</td>
                 <td className="py-2 pr-3">Execução do serviço (art. 7º, V)</td>
-                <td className="py-2">Até 1 hora ou ao desconectar</td>
+                <td className="py-2">Até 15 minutos ou ao desconectar</td>
               </tr>
               <tr className="border-b border-stone-100">
                 <td className="py-2 pr-3">Identificador de sessão no navegador</td>
                 <td className="py-2 pr-3">Manter a sessão daquele navegador</td>
                 <td className="py-2 pr-3">Execução do serviço e legítimo interesse (art. 7º, IX)</td>
-                <td className="py-2">1 hora, cifrado</td>
+                <td className="py-2">15 minutos, cifrado</td>
               </tr>
               <tr className="border-b border-stone-100">
                 <td className="py-2 pr-3">IP, data/hora e navegador (logs)</td>
@@ -184,7 +184,7 @@ export default function PrivacyPage() {
       <LegalSection title="7. Por quanto tempo guardamos">
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            Sessão do WhatsApp e credenciais: até <strong>1 hora</strong> após a
+            Sessão do WhatsApp e credenciais: até <strong>15 minutos</strong> após a
             conexão, ou até você desconectar. Depois são apagadas.
           </li>
           <li>
@@ -192,7 +192,7 @@ export default function PrivacyPage() {
             fim do envio ou da sessão.
           </li>
           <li>
-            Identificador de sessão no navegador: cifrado, apagado em 1 hora ou
+            Identificador de sessão no navegador: cifrado, apagado em 15 minutos ou
             quando você limpa os dados do navegador.
           </li>
           <li>Mensagens enviadas: ficam no WhatsApp dos envolvidos, não aqui.</li>

@@ -19,7 +19,7 @@ const STEPS: GuideStep[] = [
           e aponte a câmera para o código que aparece na tela.
         </p>
         <p>
-          A conexão vale por <strong>1 hora</strong>. Cada navegador é uma conexão
+          A conexão vale por <strong>15 minutos</strong>. Cada navegador é uma conexão
           separada, como um aparelho a mais.
         </p>
       </>
