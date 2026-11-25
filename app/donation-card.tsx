@@ -178,7 +178,7 @@ export default function DonationCard() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={data.qr}
-              alt={`QR code do PIX de R$ ${value.toFixed(2).replace(".", ",")}`}
+              alt={`Código PIX de R$ ${value.toFixed(2).replace(".", ",")} para doar`}
               width={176}
               height={176}
               className="h-44 w-44 rounded-2xl border border-amber-200 bg-white p-2"
@@ -219,7 +219,7 @@ export default function DonationCard() {
 
       {valid && data === null && !error && (
         <p className="mt-4 flex items-center gap-2 text-sm text-stone-600">
-          Gerando o QR code…
+          Gerando o código…
         </p>
       )}
 

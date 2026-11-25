@@ -77,7 +77,7 @@ const MAX_SESSIONS = Math.max(1, Number(process.env.MAX_SESSIONS ?? 25) || 25)
 
 export class TooManySessionsError extends Error {
   constructor() {
-    super("Muitas sessões abertas agora. Tente de novo em alguns minutos.")
+    super("Muitas pessoas conectadas agora. Tente de novo em alguns minutos.")
     this.name = "TooManySessionsError"
   }
 }
@@ -448,7 +448,7 @@ export async function connect(id: string): Promise<void> {
 
 function connectedSocket(session: Session): WASocket {
   if (session.status !== "connected" || !session.sock) {
-    throw new Error("O WhatsApp não está conectado. Escaneie o código primeiro.")
+    throw new Error("O WhatsApp não está conectado. Leia o código primeiro.")
   }
   return session.sock
 }

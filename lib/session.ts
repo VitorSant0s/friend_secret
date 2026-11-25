@@ -20,7 +20,7 @@ export function hasExpired(expiresAt: number, now = Date.now()): boolean {
 
 export class SessionExpiredError extends Error {
   constructor() {
-    super("A sessão de 15 minutos terminou. Escaneie o código do WhatsApp de novo.")
+    super("A conexão de 15 minutos terminou. Leia o código do WhatsApp de novo.")
     this.name = "SessionExpiredError"
   }
 }

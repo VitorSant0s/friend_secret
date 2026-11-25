@@ -8,7 +8,7 @@ export function requestSessionId(request: Request): string | null {
 export function invalidSession(): Response {
   return Response.json(
     {
-      error: "Sessão inválida ou expirada. Recarregue a página.",
+      error: "Sua conexão expirou. Recarregue a página.",
       expired: true,
     },
     { status: 401 },

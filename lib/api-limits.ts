@@ -25,7 +25,7 @@ export function tooManyRequests(result: RateLimitResult): Response {
   return Response.json(
     {
       error:
-        "Muitas requisições em pouco tempo. Aguarde alguns instantes e tente de novo.",
+        "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente de novo.",
     },
     { status: 429, headers: { "Retry-After": String(seconds) } },
   )

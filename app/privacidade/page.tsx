@@ -137,7 +137,7 @@ export default function PrivacyPage() {
               </tr>
               <tr>
                 <td className="py-2 pr-3">Doações por PIX</td>
-                <td className="py-2 pr-3">Gerar o QR code; não tratamos dados de pagamento</td>
+                <td className="py-2 pr-3">Gerar o código PIX; não tratamos dados de pagamento</td>
                 <td className="py-2 pr-3">—</td>
                 <td className="py-2">Não se aplica</td>
               </tr>

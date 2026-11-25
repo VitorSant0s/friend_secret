@@ -318,7 +318,7 @@ export default function Home() {
     const remaining = session.expiresAt - Date.now()
     const timer = setTimeout(() => {
       void restartSession(
-        "A sessão de 15 minutos terminou. Escaneie o código do WhatsApp de novo para continuar.",
+        "A conexão de 15 minutos terminou. Leia o código do WhatsApp de novo para continuar.",
       )
     }, Math.max(remaining, 0))
 
@@ -336,7 +336,7 @@ export default function Home() {
         if (!active) return
         if (data.expired) {
           void restartSession(
-            "A sessão de 15 minutos terminou. Escaneie o código do WhatsApp de novo para continuar.",
+            "A conexão de 15 minutos terminou. Leia o código do WhatsApp de novo para continuar.",
           )
           return
         }
@@ -759,7 +759,7 @@ export default function Home() {
                 Primeira vez por aqui?
               </p>
               <p className="text-sm leading-6 text-emerald-900">
-                O guia mostra o passo a passo, do QR code ao envio. É opcional e
+                O guia mostra o passo a passo, do código ao envio. É opcional e
                 pode ser fechado quando quiser.
               </p>
             </div>
@@ -851,7 +851,7 @@ export default function Home() {
                     </p>
                     {minutesLeft !== null && (
                       <p className="mt-1 text-xs text-emerald-800">
-                        Esta sessão vale por 15 minutos — restam cerca de{" "}
+                        Esta conexão vale por 15 minutos — restam cerca de{" "}
                         {minutesLeft} min.
                       </p>
                     )}
@@ -884,7 +884,7 @@ export default function Home() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={snapshot.qr}
-                        alt="QR code para conectar o WhatsApp. Abra o aplicativo no celular, entre em Aparelhos conectados e aponte a câmera."
+                        alt="Código para conectar o WhatsApp. Abra o aplicativo no celular, entre em Aparelhos conectados e aponte a câmera."
                         width={288}
                         height={288}
                         className="h-64 w-64 sm:h-72 sm:w-72"
