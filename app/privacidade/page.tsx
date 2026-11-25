@@ -21,7 +21,7 @@ function EmailLink({ value }: { value: string }) {
 }
 
 export default function PrivacyPage() {
-  const { operatorName, document, city, contactEmail, dpoEmail, hosting, logRetention } =
+  const { operatorName, contactEmail, dpoEmail, hosting, logRetention } =
     legalConfig
 
   return (
@@ -39,9 +39,9 @@ export default function PrivacyPage() {
         <p>
           Para os dados de cadastro e de uso do organizador (número conectado,
           sessão e registros de acesso), o controlador é{" "}
-          <strong>{operatorName}</strong>, documento {document}, em {city}.
-          Contato: <EmailLink value={contactEmail} />. Encarregado de dados
-          (DPO): <EmailLink value={dpoEmail} />.
+          <strong>{operatorName}</strong>. Contato:{" "}
+          <EmailLink value={contactEmail} />. Encarregado de dados (DPO):{" "}
+          <EmailLink value={dpoEmail} />.
         </p>
         <p>
           Para os dados das pessoas incluídas no sorteio (nomes e identificadores
@@ -282,7 +282,7 @@ export default function PrivacyPage() {
         <p>
           Privacidade e dados pessoais: <EmailLink value={dpoEmail} />. Assuntos
           gerais: <EmailLink value={contactEmail} />. Responsável:{" "}
-          {operatorName}, {city}.
+          {operatorName}.
         </p>
       </LegalSection>
 

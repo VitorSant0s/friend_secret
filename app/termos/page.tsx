@@ -21,8 +21,7 @@ function EmailLink({ value }: { value: string }) {
 }
 
 export default function TermsPage() {
-  const { operatorName, document, city, contactEmail, dpoEmail, minimumAge } =
-    legalConfig
+  const { operatorName, contactEmail, dpoEmail, minimumAge } = legalConfig
 
   return (
     <LegalShell
@@ -31,8 +30,8 @@ export default function TermsPage() {
     >
       <p>
         Estes Termos regulam o uso do <strong>Amigo Secreto</strong> (o
-        “Serviço”), oferecido por {operatorName}, documento {document}, em{" "}
-        {city} (“nós”). Ao usar o Serviço, você declara que leu e concorda com
+        “Serviço”), mantido por {operatorName} (“nós”). Contato:{" "}
+        <EmailLink value={contactEmail} />. Ao usar o Serviço, você declara que leu e concorda com
         estes Termos e com a{" "}
         <Link href="/privacidade" className="font-semibold text-emerald-800 underline underline-offset-4">
           Política de Privacidade
@@ -248,7 +247,8 @@ export default function TermsPage() {
         <p>
           Antes de qualquer medida judicial, as partes tentarão resolver o assunto
           de forma amigável. Fica eleito o foro do domicílio do consumidor quando
-          a lei assim exigir; nos demais casos, a comarca de {city}.
+          a lei assim exigir; nos demais casos, o foro competente segundo as
+          regras processuais brasileiras.
         </p>
       </LegalSection>
 

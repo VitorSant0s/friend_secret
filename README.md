@@ -129,10 +129,15 @@ sorteio:
   tratados, bases legais, retenção, compartilhamento, segurança, incidentes e
   direitos do titular (LGPD).
 
-Antes de colocar em produção, preencha os dados do responsável em
-[`lib/legal.ts`](lib/legal.ts) (nome/razão social, documento, cidade, e-mails,
-hospedagem e prazo de logs). Enquanto faltar algum, as páginas mostram um aviso
-vermelho. O guia está em [DISCLAIMER.md](DISCLAIMER.md).
+Antes de colocar em produção, preencha em [`lib/legal.ts`](lib/legal.ts) o nome
+público, o e-mail de contato, o e-mail do encarregado, a hospedagem e o prazo de
+logs. Enquanto faltar algum, as páginas mostram um aviso vermelho. O guia está
+em [DISCLAIMER.md](DISCLAIMER.md).
+
+Não é necessário publicar CPF, CNPJ, endereço ou telefone. A LGPD exige a
+identificação e o contato do controlador; use um e-mail dedicado ao projeto em
+vez do pessoal. Se você não quiser aparecer nem pelo nome, a alternativa é
+operar por uma pessoa jurídica ou não publicar o serviço.
 
 Ajuste a guarda dos logs para o prazo informado. O compose limita o tamanho dos
 logs; para prazo por tempo, use rotação externa (logrotate).

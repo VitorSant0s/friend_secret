@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest"
 import { missingLegalFields } from "./legal"
 
 const complete = {
-  operatorName: "Maria Silva",
-  document: "000.000.000-00",
-  city: "São Paulo/SP",
+  operatorName: "Amigo Secreto",
   contactEmail: "contato@exemplo.com",
   dpoEmail: "dpo@exemplo.com",
   hosting: "AWS e Netlify",
@@ -19,15 +17,15 @@ describe("missingLegalFields", () => {
 
   it("aponta os campos vazios", () => {
     expect(
-      missingLegalFields({ ...complete, contactEmail: "", city: "  " }),
-    ).toEqual(["city", "contactEmail"])
+      missingLegalFields({ ...complete, contactEmail: "", operatorName: "  " }),
+    ).toEqual(["operatorName", "contactEmail"])
   })
 
   it("aponta placeholders que ainda não foram trocados", () => {
     expect(
       missingLegalFields({
         ...complete,
-        operatorName: "PREENCHER: nome ou razão social",
+        operatorName: "PREENCHER: nome público ou nome do projeto",
         dpoEmail: "PREENCHER: e-mail do encarregado",
       }),
     ).toEqual(["operatorName", "dpoEmail"])

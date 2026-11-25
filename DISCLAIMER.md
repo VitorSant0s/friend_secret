@@ -26,10 +26,11 @@ do titular (art. 18 da LGPD).
 
 ## Antes de publicar
 
-1. Preencha os dados do responsável em [`lib/legal.ts`](lib/legal.ts):
-   nome/razão social, CPF/CNPJ, cidade/UF, e-mail de contato, e-mail do
-   encarregado, hospedagem e prazo de guarda dos logs. Enquanto houver campos
-   vazios ou com "PREENCHER", as páginas mostram um aviso vermelho.
+1. Preencha os dados em [`lib/legal.ts`](lib/legal.ts): nome público (ou nome
+   do projeto), e-mail de contato, e-mail do encarregado, hospedagem e prazo de
+   guarda dos logs. Enquanto houver campos vazios ou com "PREENCHER", as páginas
+   mostram um aviso vermelho. Não é preciso publicar CPF, CNPJ, endereço ou
+   telefone; use um e-mail dedicado ao projeto.
 2. Ajuste a retenção de logs do servidor para o prazo informado na Política.
    Os serviços do `docker-compose.yml` já limitam o tamanho dos logs; guarda por
    tempo exige rotação externa (ex.: logrotate).

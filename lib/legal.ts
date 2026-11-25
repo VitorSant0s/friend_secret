@@ -1,7 +1,5 @@
 export type LegalConfig = {
   operatorName: string
-  document: string
-  city: string
   contactEmail: string
   dpoEmail: string
   hosting: string
@@ -14,10 +12,8 @@ export type LegalConfig = {
  * ou com o texto "PREENCHER", as páginas de termos exibem um aviso.
  */
 export const legalConfig: LegalConfig = {
-  operatorName: "PREENCHER: nome ou razão social",
-  document: "PREENCHER: CPF ou CNPJ",
-  city: "PREENCHER: cidade/UF",
-  contactEmail: "PREENCHER: e-mail de contato",
+  operatorName: "PREENCHER: nome público ou nome do projeto",
+  contactEmail: "PREENCHER: e-mail de contato do projeto",
   dpoEmail: "PREENCHER: e-mail do encarregado de dados",
   hosting: "PREENCHER: provedores de hospedagem e região",
   logRetention: "PREENCHER: prazo de guarda dos logs de acesso",
@@ -29,8 +25,6 @@ export const LEGAL_DATE = "25 de novembro de 2026"
 
 const REQUIRED_FIELDS: (keyof LegalConfig)[] = [
   "operatorName",
-  "document",
-  "city",
   "contactEmail",
   "dpoEmail",
   "hosting",
