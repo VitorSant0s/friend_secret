@@ -1,4 +1,5 @@
-import { limitRequest, tooManyRequests } from "@/lib/api-limits"
+import { clientIp, limitRequest, tooManyRequests } from "@/lib/api-limits"
+import { audit } from "@/lib/audit"
 import { invalidSession, requestSessionId } from "@/lib/api-session"
 import { groupDetails } from "@/lib/whatsapp"
 
@@ -19,6 +20,12 @@ export async function GET(request: Request) {
 
   try {
     const group = await groupDetails(id, groupId)
+    audit({
+      event: "participants.listed",
+      sessionId: id,
+      ip: clientIp(request),
+      detail: { count: group.participants.length },
+    })
     return Response.json({
       subject: group.subject,
       participants: group.participants.map(({ id: participantId, name }) => ({

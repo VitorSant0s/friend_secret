@@ -15,7 +15,7 @@ tirou. A pessoa sem celular compra e entrega o presente dela como todo mundo.
 
 ## Requisitos
 
-- Node.js 20 ou mais novo (`node -v`)
+- Node.js 24 ou mais novo (`node -v`)
 - WhatsApp no celular, para escanear o QR code
 
 ## Como rodar
@@ -99,6 +99,10 @@ no aplicativo do banco dela.
 - O sorteio em si existe apenas na memória durante o envio.
 - A chave PIX (se configurada) fica só no servidor e vira um QR code; nada é
   cobrado automaticamente.
+- **Auditoria:** eventos de operação ficam em um banco SQLite em
+  `.data/audit.sqlite` (volume `audit` no Docker). Sem nomes, mensagens, telefones
+  completos ou IP em texto puro — sessão e IP vão como hash, e a conta vai
+  mascarada. Ver a seção [Auditoria](#auditoria).
 
 ## Aviso
 
@@ -226,6 +230,45 @@ Sem `NEXT_PUBLIC_API_URL`, o site conversa com o próprio servidor:
 
 ```bash
 npm run dev
+```
+
+## Auditoria
+
+O motor grava eventos de auditoria em **SQLite**, sem dependência nativa
+(`node:sqlite`). O arquivo fica em `.data/audit.sqlite`, com o sal dos hashes em
+`.data/audit.salt`, montado no volume `audit` do Docker.
+
+O que é registrado:
+
+- criação, conexão, expiração e desconexão de sessão;
+- pedidos de conexão aceitos e recusados;
+- acesso a grupos e participantes (apenas contagens);
+- início, conclusão e falha de envio (contagens e versão dos termos);
+- acessos recusados por sessão inválida e bloqueios por limite.
+
+O que **não** é registrado: nomes, mensagens, telefones completos, grupos, IP em
+texto puro ou identificador de sessão em texto puro. IP e sessão são gravados
+como hash com sal; a conta conectada vai mascarada (`+55 11 *****-1234`).
+
+Configuração:
+
+```bash
+AUDIT_RETENTION_DAYS=180   # padrão
+AUDIT_SALT=               # opcional; se vazio, um sal é gerado em .data/audit.salt
+```
+
+A limpeza por prazo roda sozinha. Nunca interrompe a operação: se o banco falhar,
+o app continua funcionando e avisa no log. Se mudar `AUDIT_RETENTION_DAYS`, ajuste
+o prazo informado na Política de Privacidade.
+
+Para inspecionar:
+
+```bash
+docker compose exec app node -e "
+const { DatabaseSync } = require('node:sqlite');
+const db = new DatabaseSync('.data/audit.sqlite');
+console.table(db.prepare('SELECT created_at, event, detail FROM audit_log ORDER BY id DESC LIMIT 20').all());
+"
 ```
 
 ## Desenvolvimento

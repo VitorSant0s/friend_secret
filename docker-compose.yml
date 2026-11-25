@@ -9,6 +9,8 @@ services:
     volumes:
       # As credenciais do WhatsApp precisam sobreviver a reinícios e atualizações
       - sessions:/app/.whatsapp-sessions
+      # Banco de auditoria (SQLite) e o sal dos hashes
+      - audit:/app/.data
     expose:
       - "3000"
     logging:
@@ -38,4 +40,5 @@ services:
 
 volumes:
   sessions:
+  audit:
   letsencrypt:

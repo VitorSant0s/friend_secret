@@ -11,6 +11,7 @@ import makeWASocket, {
 import pino from "pino"
 import QRCode from "qrcode"
 import { maskAccount } from "@/lib/account"
+import { audit } from "@/lib/audit"
 import { delay } from "@/lib/delay"
 import { hideMessageForSender } from "@/lib/hide-message"
 import { isOwnChat } from "@/lib/self-chat"
@@ -135,7 +136,7 @@ function startSweeper(): void {
     const now = Date.now()
     for (const session of state.map.values()) {
       if (now >= session.expiresAt) {
-        void destroySession(session.id)
+        void destroySession(session.id, "expired")
       }
     }
     void sweepDisk(now)
@@ -160,7 +161,7 @@ async function sweepDisk(now: number): Promise<void> {
     const id = entry.slice(0, -".meta.json".length)
     const meta = await readMeta(id)
     if (meta && hasExpired(meta.expiresAt, now)) {
-      await destroySession(id)
+      await destroySession(id, "expired")
     }
   }
 }
@@ -181,7 +182,7 @@ export async function ensureSession(id: string): Promise<Session> {
 
   if (existing) {
     if (hasExpired(existing.expiresAt)) {
-      await destroySession(id)
+      await destroySession(id, "expired")
       throw new SessionExpiredError()
     }
     return existing
@@ -196,7 +197,7 @@ export async function ensureSession(id: string): Promise<Session> {
     for (const item of [...state.map.values()]) {
       if (hasExpired(item.expiresAt)) {
         state.map.delete(item.id)
-        void destroySession(item.id)
+        void destroySession(item.id, "expired")
       }
     }
     if (state.map.size + state.pending.size >= MAX_SESSIONS) {
@@ -211,7 +212,7 @@ export async function ensureSession(id: string): Promise<Session> {
     const expiresAt = meta?.expiresAt ?? sessionExpiresAt(createdAt)
 
     if (hasExpired(expiresAt)) {
-      await destroySession(id)
+      await destroySession(id, "expired")
       throw new SessionExpiredError()
     }
 
@@ -235,6 +236,7 @@ export async function ensureSession(id: string): Promise<Session> {
 
     await writeMeta(id, { createdAt, expiresAt })
     state.map.set(id, session)
+    audit({ event: "session.created", sessionId: id })
     startSweeper()
     return session
   })()
@@ -252,13 +254,22 @@ export function sessionExists(id: string): boolean {
   return store().map.has(id)
 }
 
-export async function destroySession(id: string): Promise<void> {
+export async function destroySession(
+  id: string,
+  reason: "expired" | "logout" | "logged_out" | "cleanup" = "cleanup",
+): Promise<void> {
   const state = store()
   const session = state.map.get(id)
   state.map.delete(id)
   state.pending.delete(id)
 
   if (session) {
+    audit({
+      event: "session.destroyed",
+      sessionId: id,
+      account: maskAccount(session.me),
+      detail: { reason },
+    })
     if (session.retry) clearTimeout(session.retry)
     session.closing = true
     session.qr = null
@@ -288,7 +299,7 @@ export async function sessionStatus(
 
   if (session) {
     if (hasExpired(session.expiresAt)) {
-      await destroySession(id)
+      await destroySession(id, "expired")
       return {
         status: "idle",
         qr: null,
@@ -304,7 +315,7 @@ export async function sessionStatus(
   const meta = await readMeta(id)
   if (meta !== null) {
     if (hasExpired(meta.expiresAt)) {
-      await destroySession(id)
+      await destroySession(id, "expired")
       return {
         status: "idle",
         qr: null,
@@ -396,6 +407,11 @@ export async function connect(id: string): Promise<void> {
         session.starting = null
         session.me = sock.user?.id ?? null
         session.groups = null
+        audit({
+          event: "session.connected",
+          sessionId: id,
+          account: maskAccount(session.me),
+        })
         // A contagem de 15 minutos começa quando o QR é lido.
         session.expiresAt = Date.now() + SESSION_TTL_MS
         void writeMeta(id, {
@@ -415,7 +431,7 @@ export async function connect(id: string): Promise<void> {
         session.starting = null
 
         if (loggedOut) {
-          await destroySession(id)
+          await destroySession(id, "logged_out")
           return
         }
 
@@ -443,6 +459,11 @@ export async function connect(id: string): Promise<void> {
     session.status = "error"
     session.error = error instanceof Error ? error.message : String(error)
     session.starting = null
+    audit({
+      event: "session.error",
+      sessionId: id,
+      detail: { message: session.error.slice(0, 160) },
+    })
   }
 }
 

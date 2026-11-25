@@ -1,3 +1,4 @@
+import { audit } from "./audit"
 import { rateLimiter, type RateLimitResult } from "./rate-limit"
 
 /** IP real atrás do nginx; em desenvolvimento, sem proxy, usa "local". */
@@ -11,13 +12,28 @@ export function clientIp(request: Request): string {
   return "local"
 }
 
+const lastLimitLog = new Map<string, number>()
+
 export function limitRequest(
   request: Request,
   bucket: string,
   limit: number,
   windowMs: number,
 ): RateLimitResult {
-  return rateLimiter().hit(`${bucket}:${clientIp(request)}`, limit, windowMs)
+  const ip = clientIp(request)
+  const result = rateLimiter().hit(`${bucket}:${ip}`, limit, windowMs)
+
+  if (!result.allowed) {
+    const key = `${bucket}:${ip}`
+    const now = Date.now()
+    if (now - (lastLimitLog.get(key) ?? 0) >= 60_000) {
+      lastLimitLog.set(key, now)
+      if (lastLimitLog.size > 1000) lastLimitLog.clear()
+      audit({ event: "rate.limited", ip, detail: { bucket } })
+    }
+  }
+
+  return result
 }
 
 export function tooManyRequests(result: RateLimitResult): Response {

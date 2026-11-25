@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import DonationCard from "@/app/donation-card"
 import Guide from "@/app/guide"
 import { expiryNotice } from "@/lib/expiry-notice"
+import { LEGAL_VERSION } from "@/lib/legal"
 import { formatMessage } from "@/lib/message"
 import {
   apiFetch,
@@ -636,6 +637,8 @@ export default function Home() {
           representatives: Object.fromEntries(
             phoneLessRows.map((row) => [row.id, row.representative]),
           ),
+          termsAccepted: true,
+          termsVersion: LEGAL_VERSION,
         }),
       })
 

@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Sessões do WhatsApp por navegador
 .whatsapp-sessions
+
+# Banco de auditoria e sal dos hashes
+.data

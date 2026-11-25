@@ -71,6 +71,12 @@ export default function PrivacyPage() {
             pessoas de fora do grupo.
           </li>
           <li>
+            <strong>Registros de auditoria:</strong> tipo de evento (conexão,
+            desconexão, envio, acesso recusado), identificador de sessão e IP em
+            forma de hash, conta mascarada e contagens. Não guardamos nomes,
+            telefones completos, mensagens nem conteúdo.
+          </li>
+          <li>
             <strong>Não tratamos:</strong> CPF, e-mail, endereço, dados bancários,
             dados de pagamento, conteúdo de conversas ou dados sensíveis.
           </li>
@@ -135,6 +141,12 @@ export default function PrivacyPage() {
                 <td className="py-2 pr-3">Legítimo interesse (art. 7º, IX) e obrigação legal (art. 7º, II)</td>
                 <td className="py-2">{logRetention}</td>
               </tr>
+              <tr className="border-b border-stone-100">
+                <td className="py-2 pr-3">Eventos de auditoria (sessão/IP com hash, conta mascarada, contagens)</td>
+                <td className="py-2 pr-3">Segurança, prevenção a abuso e prestação de contas</td>
+                <td className="py-2 pr-3">Legítimo interesse (art. 7º, IX)</td>
+                <td className="py-2">180 dias (padrão)</td>
+              </tr>
               <tr>
                 <td className="py-2 pr-3">Doações por PIX</td>
                 <td className="py-2 pr-3">Gerar o código PIX; não tratamos dados de pagamento</td>
@@ -197,6 +209,9 @@ export default function PrivacyPage() {
           </li>
           <li>Mensagens enviadas: ficam no WhatsApp dos envolvidos, não aqui.</li>
           <li>Registros de acesso: {logRetention}.</li>
+          <li>
+            Registros de auditoria: 180 dias por padrão, com exclusão automática.
+          </li>
         </ul>
         <p>
           Depois dos prazos, os dados são eliminados ou anonimizados, salvo quando
@@ -209,8 +224,10 @@ export default function PrivacyPage() {
           Adotamos medidas técnicas e administrativas para proteger os dados,
           incluindo HTTPS, sessão do navegador cifrada com AES-GCM e chave não
           exportável, credenciais isoladas por sessão, expiração automática e
-          limite de sessões simultâneas. Nenhum sistema é totalmente seguro;
-          falhas e incidentes serão tratados conforme o item 9.
+          limite de sessões simultâneas. A auditoria fica em um banco SQLite no
+          servidor e guarda apenas eventos, hashes e contagens, nunca nomes ou
+          mensagens. Nenhum sistema é totalmente seguro; falhas e incidentes
+          serão tratados conforme o item 9.
         </p>
       </LegalSection>
 
@@ -255,7 +272,8 @@ export default function PrivacyPage() {
         </p>
         <p>
           O servidor registra acessos (IP, data/hora e navegador) para segurança e
-          funcionamento, pelo prazo informado no item 7.
+          funcionamento, pelo prazo informado no item 7. Os eventos de auditoria
+          ficam em um banco SQLite local, com dados minimizados e hashes.
         </p>
       </LegalSection>
 

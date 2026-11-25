@@ -4,6 +4,7 @@ out
 .git
 .gitignore
 .whatsapp-sessions
+.data
 .whatsapp-auth
 .env
 .env.*

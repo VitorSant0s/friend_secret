@@ -1,5 +1,6 @@
 import QRCode from "qrcode"
-import { limitRequest, tooManyRequests } from "@/lib/api-limits"
+import { clientIp, limitRequest, tooManyRequests } from "@/lib/api-limits"
+import { audit } from "@/lib/audit"
 import { buildPixPayload } from "@/lib/pix"
 import { donationConfig, isDonationConfigured } from "@/lib/pix-config"
 
@@ -30,6 +31,11 @@ export async function GET(request: Request) {
   }
 
   try {
+    audit({
+      event: "donation.qr",
+      ip: clientIp(request),
+      detail: { amount: rounded },
+    })
     const config = donationConfig()
     const code = buildPixPayload({
       key: config.key,

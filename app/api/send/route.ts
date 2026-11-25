@@ -4,8 +4,10 @@ import {
   validateSetup,
   type Representatives,
 } from "@/lib/draw"
-import { limitRequest, tooManyRequests } from "@/lib/api-limits"
+import { clientIp, limitRequest, tooManyRequests } from "@/lib/api-limits"
 import { invalidSession, requestSessionId } from "@/lib/api-session"
+import { audit } from "@/lib/audit"
+import { LEGAL_VERSION } from "@/lib/legal"
 import { formatMessage } from "@/lib/message"
 import { buildPeople } from "@/lib/participants"
 import { SessionExpiredError } from "@/lib/session"
@@ -29,6 +31,8 @@ type Body = {
     external?: boolean
   }[]
   representatives?: Record<string, string>
+  termsAccepted?: boolean
+  termsVersion?: string
 }
 
 export async function POST(request: Request) {
@@ -38,6 +42,8 @@ export async function POST(request: Request) {
   const sessionId = requestSessionId(request)
   if (!sessionId) return invalidSession()
 
+  const ip = clientIp(request)
+
   let body: Body
   try {
     body = (await request.json()) as Body
@@ -46,6 +52,15 @@ export async function POST(request: Request) {
   }
 
   try {
+    if (body.termsAccepted !== true) {
+      throw new Error(
+        "Para enviar, é preciso aceitar os Termos de Uso e a Política de Privacidade.",
+      )
+    }
+
+    const termsVersion =
+      String(body.termsVersion ?? "").slice(0, 20) || LEGAL_VERSION
+
     const groupId = body.groupId?.trim()
     if (!groupId) throw new Error("Escolha o grupo do sorteio.")
     if (!Array.isArray(body.people) || body.people.length < 4) {
@@ -86,6 +101,18 @@ export async function POST(request: Request) {
       text: formatMessage(delivery, { date }),
     }))
 
+    audit({
+      event: "send.requested",
+      sessionId,
+      ip,
+      detail: {
+        people: participants.length,
+        noPhone: participants.filter((person) => !person.hasPhone).length,
+        termsVersion,
+        withDate: Boolean(date),
+      },
+    })
+
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
       async start(controller) {
@@ -99,8 +126,29 @@ export async function POST(request: Request) {
           const result = await sendMessages(sessionId, targets, (progress) => {
             emit({ type: "progress", ...progress })
           })
+          audit({
+            event: "send.completed",
+            sessionId,
+            detail: {
+              sent: result.sent,
+              failed: result.failed,
+              hidden: result.hidden,
+              hideFailed: result.hideFailed,
+              self: result.self,
+            },
+          })
           emit({ type: "done", ...result })
         } catch (error) {
+          audit({
+            event: "send.failed",
+            sessionId,
+            detail: {
+              reason:
+                error instanceof Error
+                  ? error.message.slice(0, 160)
+                  : "unknown",
+            },
+          })
           emit({
             type: "error",
             message: error instanceof Error ? error.message : String(error),
@@ -118,6 +166,14 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
+    audit({
+      event: "send.rejected",
+      sessionId,
+      ip,
+      detail: {
+        reason: error instanceof Error ? error.message.slice(0, 160) : "unknown",
+      },
+    })
     if (error instanceof TooManySessionsError) {
       return Response.json({ error: error.message }, { status: 429 })
     }

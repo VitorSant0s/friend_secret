@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const id = requestSessionId(request)
   if (!id) return invalidSession()
 
-  await destroySession(id)
+  await destroySession(id, "logout")
 
   return Response.json({
     status: "idle",
